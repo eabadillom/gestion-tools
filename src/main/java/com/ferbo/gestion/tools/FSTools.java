@@ -1,6 +1,7 @@
 package com.ferbo.gestion.tools;
 
 import java.io.File;
+import java.io.InputStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +22,18 @@ public class FSTools {
 		}
 		
 		return resourcePath;
+	}
+	
+	public InputStream getResourceStream(String resource) {
+		InputStream input = null;
+		
+		try {
+			input = getClass().getClassLoader().getResourceAsStream(resource);
+		} catch(Exception e) {
+			log.error("Recurso no encontrado...", e);
+		}
+		
+		return input;
 	}
 
 }
