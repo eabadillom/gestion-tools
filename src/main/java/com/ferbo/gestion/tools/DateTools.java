@@ -622,4 +622,25 @@ public class DateTools {
 		
 		return resultado;
 	}
+	
+	public static int getSemanaAnio(Date fecha) {
+        int semana = -1;
+        Calendar cal = null;
+
+        cal = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
+        cal.setTime(fecha);
+        semana = cal.get(Calendar.WEEK_OF_YEAR);
+
+        return semana;
+    }
+	
+	public static Date getLunesDeSemanaDate(int anio, int semana) {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT-6:00"));
+        calendar.clear();
+        calendar.set(Calendar.YEAR, anio);
+        calendar.set(Calendar.WEEK_OF_YEAR, semana);
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        return calendar.getTime();
+    }
+	
 }
