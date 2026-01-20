@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.TimeZone;
 
 public class DateTools {
@@ -37,18 +38,28 @@ public class DateTools {
 	public static final int AM         = Calendar.AM;
 	public static final int PM         = Calendar.PM;
 	
-	public static String PROP_ENERO      = "enero"; //Para lectura del .properties
-	public static String PROP_FEBRERO    = "febrero"; //Para lectura del .properties
-	public static String PROP_MARZO      = "marzo"; //Para lectura del .properties
-	public static String PROP_ABRIL      = "abril"; //Para lectura del .properties
-	public static String PROP_MAYO       = "mayo"; //Para lectura del .properties
-	public static String PROP_JUNIO      = "junio"; //Para lectura del .properties
-	public static String PROP_JULIO      = "julio"; //Para lectura del .properties
-	public static String PROP_AGOSTO     = "agosto"; //Para lectura del .properties
-	public static String PROP_SEPTIEMBRE = "septiembre"; //Para lectura del .properties
-	public static String PROP_OCTUBRE    = "octubre"; //Para lectura del .properties
-	public static String PROP_NOVIEMBRE  = "noviembre"; //Para lectura del .properties
-	public static String PROP_DICIEMBRE  = "diciembre"; //Para lectura del .properties
+	public static final String PROP_ENERO      = "enero"; //Para lectura del .properties
+	public static final String PROP_FEBRERO    = "febrero"; //Para lectura del .properties
+	public static final String PROP_MARZO      = "marzo"; //Para lectura del .properties
+	public static final String PROP_ABRIL      = "abril"; //Para lectura del .properties
+	public static final String PROP_MAYO       = "mayo"; //Para lectura del .properties
+	public static final String PROP_JUNIO      = "junio"; //Para lectura del .properties
+	public static final String PROP_JULIO      = "julio"; //Para lectura del .properties
+	public static final String PROP_AGOSTO     = "agosto"; //Para lectura del .properties
+	public static final String PROP_SEPTIEMBRE = "septiembre"; //Para lectura del .properties
+	public static final String PROP_OCTUBRE    = "octubre"; //Para lectura del .properties
+	public static final String PROP_NOVIEMBRE  = "noviembre"; //Para lectura del .properties
+	public static final String PROP_DICIEMBRE  = "diciembre"; //Para lectura del .properties
+	
+	public static final String PROP_CD_DOMINGO   = "D";
+    public static final String PROP_CD_LUNES     = "L";
+    public static final String PROP_CD_MARTES    = "M";
+    public static final String PROP_CD_MIERCOLES = "X";
+    public static final String PROP_CD_JUEVES    = "J";
+    public static final String PROP_CD_VIERNES   = "V";
+    public static final String PROP_CD_SABADO    = "S";
+
+    public static String[] PROP_DIA_SEMANA = {PROP_CD_DOMINGO, PROP_CD_LUNES, PROP_CD_MARTES, PROP_CD_MIERCOLES, PROP_CD_JUEVES, PROP_CD_VIERNES, PROP_CD_SABADO};
 	
 	public static final String KEY_SEPARADOR_DIA = " ";//Para lectura del .properties
 	
@@ -634,13 +645,53 @@ public class DateTools {
         return semana;
     }
 	
-	public static Date getLunesDeSemanaDate(int anio, int semana) {
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT-6:00"));
-        calendar.clear();
-        calendar.set(Calendar.YEAR, anio);
-        calendar.set(Calendar.WEEK_OF_YEAR, semana);
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        return calendar.getTime();
-    }
+	private static Integer getCalendarDayOfWeek(String diaSemana)
+	throws GestionException {
+		if(PROP_CD_DOMINGO.equalsIgnoreCase(diaSemana))
+			return Calendar.SUNDAY;
+		if(PROP_CD_LUNES.equalsIgnoreCase(diaSemana))
+			return Calendar.MONDAY;
+		if(PROP_CD_MARTES.equalsIgnoreCase(diaSemana))
+			return Calendar.TUESDAY;
+		if(PROP_CD_MIERCOLES.equalsIgnoreCase(diaSemana))
+			return Calendar.WEDNESDAY;
+		if(PROP_CD_JUEVES.equalsIgnoreCase(diaSemana))
+			return Calendar.THURSDAY;
+		if(PROP_CD_VIERNES.equalsIgnoreCase(diaSemana))
+			return Calendar.FRIDAY;
+		if(PROP_CD_VIERNES.equalsIgnoreCase(diaSemana))
+			return Calendar.SATURDAY;
+		throw new GestionException("Día de la semana no reconocido. [(L)unes, (M)artes, (X)Miercoles, (J)ueves, (V)iernes, (S)abado, (D)omingo]");
+	}
+	
+	/**Con base en el año, el número de semana y el día (PROP_CD_[DIA]) se obtiene un Optional<Date>
+	 * que representa a la fecha 
+	 * @param anio Por ejemplo: 2026
+	 * @param semana Por ejemplo: 1 (primera semana del año 2026).
+	 * @param diaSemana Por ejemplo: "L" (Lunes de la primera semana del año 2026)
+	 * @return Date con la fecha indicada, por ejemplo 29 de diciembre de 2025.
+	 */
+	public static Optional<Date> getDiaDeSemanaDate(int anio, int semana, String diaSemana) {
+		Optional<Date> respuesta = null;
+		Calendar calendar = null;
+		TimeZone zone = null;
+		Locale locale = null;
+		Integer iDiaSemana = null;
+		
+		try {
+			zone = TimeZone.getTimeZone("GMT-6:00");
+			locale = new Locale("es", "MX");
+			calendar   = GregorianCalendar.getInstance(zone, locale);
+			iDiaSemana = getCalendarDayOfWeek(diaSemana);
+			calendar.clear();
+			calendar.set(Calendar.YEAR, anio);
+			calendar.set(Calendar.WEEK_OF_YEAR, semana);
+			calendar.set(Calendar.DAY_OF_WEEK, iDiaSemana);
+			respuesta = Optional.of(calendar.getTime());
+		} catch(Exception ex) {
+			respuesta = Optional.empty();
+		}
+		return respuesta;
+	}
 	
 }
